@@ -8,6 +8,9 @@ import os
 import sys
 #import sklearn
 from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import make_pipeline
 import operator
 
 def pol2(x, A, B, C):
@@ -23,13 +26,18 @@ def RelativeError(yexp, ymod):
     return abs((yexp - ymod)/yexp)
 
 x = np.random.rand(100,1)
-y = 5*x**2 +0.2*np.random.randn(100,1)
+y = 5*x**2 +0.8*np.random.randn(100,1)
+poly2 = PolynomialFeatures(degree = 2)
+plt.scatter(x,y, c='r')
+x2 = poly2.fit_transform(np.ndarray.flatten(x)[:,np.newaxis])
+ 
 linreg = LinearRegression()
-linreg.fit(x,y)
-xnew = np.array([[0],[1]])
-ypredict = linreg.predict(xnew)
-#plt.plot(xnew, ypredict)
-plt.scatter(x,y, c = 'r')
+linreg.fit(x2,y)
+
+Xplot = poly2.fit_transform(np.ndarray.flatten(x)[:,np.newaxis])
+ypredict = linreg.predict(Xplot)
+x2, ypredict = zip(*sorted(zip(x, ypredict), key = operator.itemgetter(0)))
+plt.plot(x2, ypredict, c = 'b', linestyle = '--',lw = 3)
 
 p = 3
 A = np.zeros((len(x), p))
@@ -44,10 +52,14 @@ ytilde = X @ beta
 
 x, ytilde = zip(*sorted(zip(x, ytilde.values), key = operator.itemgetter(0)))
 
-plt.plot(x, ytilde, c = 'k')
+plt.plot(x, ytilde, c = 'g',linestyle = '-.', lw = 2)
 plt.show()
 plt.clf()
-sys.exit()
+
+print(MSE(y,ypredict))
+print(R2(y,ypredict))
+print(MSE(y,ytilde))
+print(R2(y,ytilde))
 
 
 
